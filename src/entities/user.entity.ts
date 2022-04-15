@@ -1,14 +1,15 @@
 import { genSaltSync, hashSync } from 'bcryptjs';
 import { SALT_ROUND } from 'src/common';
-import { BeforeInsert, Column, Entity, Generated, OneToMany } from 'typeorm';
+import { BeforeInsert, Column, Entity, Generated, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Product } from './product.entity';
+import { UserInformation } from './user-information.entity';
 
 @Entity('user')
 export class User extends CommonEntity {
   @Column({
     type: 'varchar',
-    name: 'user_name',
+    name: 'userName',
     nullable: true,
   })
   userName: string;
@@ -23,6 +24,14 @@ export class User extends CommonEntity {
   public password: string;
 
   @Column({
+    type: 'boolean',
+    name: 'isLogged',
+    nullable: false,
+    default: false,
+  })
+  isLogged: boolean;
+  
+  @Column({
     name: 'uuid',
   })
   @Generated('uuid')
@@ -30,6 +39,10 @@ export class User extends CommonEntity {
 
   @OneToMany(() => Product, (product) => product.user)
   products: Product[];
+
+  @OneToOne(() => UserInformation)
+  @JoinColumn()
+  userInformation: UserInformation;
 
   @BeforeInsert()
   hashPassword() {

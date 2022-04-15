@@ -11,18 +11,19 @@ export class CommonEntity {
     type: 'bigint',
     unsigned: true,
     comment: 'Primary Key',
+    name: 'id',
   })
   id?: number;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
-    name: 'created_at',
+    name: 'createdAt',
   })
   createdAt: Date;
 
   @DeleteDateColumn({
     type: 'timestamp with time zone',
-    name: 'deleted_at',
+    name: 'deletedAt',
     default: null,
     nullable: true,
   })
@@ -30,7 +31,7 @@ export class CommonEntity {
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
-    name: 'updated_at',
+    name: 'updatedAt',
     default: null,
     nullable: true,
   })
@@ -38,7 +39,7 @@ export class CommonEntity {
 
   @Column({
     type: 'boolean',
-    name: 'is_deleted',
+    name: 'isDeleted',
     default: false,
   })
   isDeleted: boolean;

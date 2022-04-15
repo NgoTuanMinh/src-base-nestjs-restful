@@ -1,5 +1,5 @@
-export class LoginInput {
+export class LoginOutput {
   accessToken?: string;
   refreshToken?: string;
-  expireTime?: string;
+  expireTime?: number;
 }

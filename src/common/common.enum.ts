@@ -21,3 +21,11 @@ export enum PaginationType {
 export enum ByteSize {
   ONE_MEGA_BYTE = 1048576,
 }
+
+export enum TypeSocialNetwork {
+  FACEBOOK = 'FACEBOOK',
+  TWITTER = 'TWITTER',
+  TIKTOK = 'TIKTOK',
+  INSTAGRAM = 'INSTAGRAM',
+  YOUTUBE = 'YOUTUBE',
+}
