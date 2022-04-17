@@ -1,13 +1,12 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
-import { LoginInput, RefreshTokenInput, UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/authentication.input';
 import { UserRepository } from './user.repository';
 import { UserService } from './user.service';
-import { LoginOutput } from './dto/authentication.output';
 import { UserInformation } from 'src/entities/user-information.entity';
-import JwtAuthenticationGuard from './jwt-authentication.guard';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
+import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
+import { UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
 
 @Controller()
 export class UserController {
@@ -20,22 +19,12 @@ export class UserController {
     return this.userService.create(data);
   }
 
-  @Post('/login')
-  async login(@Body() data: LoginInput): Promise<LoginOutput> {
-    return await this.userService.handleLogin(data);
-  }
-
-  @Post('/refresh-token')
-  async refreshToken(@Body() data: RefreshTokenInput): Promise<LoginOutput> {
-    return await this.userService.refreshToken(data);
-  }
-
   @Post('/update-user-info')
   @UseGuards(JwtAuthenticationGuard)
   async updateUserInfo(
     @Body() data: UpdateUserInfoInput,
     @CurrentAccount() account: any,
-    ): Promise<UserInformation> {
+  ): Promise<UserInformation> {
     return await this.userService.updateUserInfo(data, account?.id);
   }
 
@@ -44,7 +33,7 @@ export class UserController {
   async updateSocialNetwork(
     @Body() data: UpdateUserSocialNetwork[],
     @CurrentAccount() account: any,
-    ): Promise<UserInformation> {
+  ): Promise<UserInformation> {
     console.log('data', data);
     return await this.userService.updateUserSocialNetwork(data, account?.id);
   }
@@ -52,7 +41,7 @@ export class UserController {
   @Get('/all-user')
   getAllUser(): Promise<Array<User>> {
     return this.userRepository.find({
-      relations: ['userInformation']
+      relations: ['userInformation'],
     });
   }
 }
