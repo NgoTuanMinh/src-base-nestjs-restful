@@ -4,9 +4,19 @@ export interface QueryConfiguration {
   take?: number;
   skip?: number;
 }
-export interface PayloadResponse<T, U> {
-  data: T;
-  metadata: U;
+
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+}
+
+export interface PayloadResponse{
+  data: any[];
+  // metadata: U;
+  total: number;
+  itemPage: number;
+  currentPage: number;
+  lastPage: number;
 }
 export interface Pagination {
   total: number;
@@ -34,7 +44,7 @@ export function configQueryCondition(query: {
 export function paginateResponse(
   data: [any[], number],
   options: { page: number; limit: number },
-): PayloadResponse<any, Pagination> {
+): PayloadResponse {
   const { page, limit } = options;
   const result = data?.[0];
   // record total
@@ -63,11 +73,9 @@ export function paginateResponse(
 
   return {
     data: [...result],
-    metadata: {
-      total: total,
-      itemPage: itemPage,
-      currentPage: currentPage,
-      lastPage: lastPage,
-    },
+    total: total,
+    itemPage: itemPage,
+    currentPage: currentPage,
+    lastPage: lastPage,
   };
 }

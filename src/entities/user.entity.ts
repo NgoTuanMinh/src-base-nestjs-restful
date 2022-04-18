@@ -37,8 +37,8 @@ export class User extends CommonEntity {
   @Generated('uuid')
   uuid: string;
 
-  @OneToMany(() => Product, (product) => product.user)
-  products: Product[];
+  // @OneToMany(() => Product, (product) => product.user)
+  // products: Product[];
 
   @OneToOne(() => UserInformation)
   @JoinColumn()

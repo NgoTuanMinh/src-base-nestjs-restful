@@ -18,28 +18,26 @@ import { Test } from 'src/entities/test.entity';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @HttpCode(200)
-  @Get()
-  @UseGuards(JwtAuthenticationGuard)
-  getAll(@CurrentAccount() account: any): Promise<Array<Product>> {
-    console.log('user=====', account);
-    return this.productService.findAll();
-  }
+  // @HttpCode(200)
+  // @Get()
+  // @UseGuards(JwtAuthenticationGuard)
+  // getAll(@CurrentAccount() account: any): Promise<Array<Product>> {
+  //   console.log('user=====', account);
+  //   return this.productService.findAll();
+  // }
 
-  @HttpCode(200)
-  @Get('/paymentnotice/now')
-  getTest(): Promise<Array<Test>> {
-    return this.productService.findTest();
-  }
+  // @HttpCode(200)
+  // @Get('/paymentnotice/now')
+  // getTest(): Promise<Array<Test>> {
+  //   return this.productService.findTest();
+  // }
 
-  @Post()
+  @Post('/create-product')
   @UseGuards(JwtAuthenticationGuard)
   createProduct(
     @CurrentAccount() account: any,
     @Body() data: CreateProductInput,
   ): Promise<Product> {
-    console.log('user', account);
-
-    return this.productService.create(data, Number(account?.id));
+    return this.productService.createProduct(data, Number(account?.id));
   }
 }

@@ -7,6 +7,7 @@ import { UserInformation } from 'src/entities/user-information.entity';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import { UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
+import { PaginationOptions, PayloadResponse } from 'src/utils/paginationUtils';
 
 @Controller()
 export class UserController {
@@ -34,8 +35,43 @@ export class UserController {
     @Body() data: UpdateUserSocialNetwork[],
     @CurrentAccount() account: any,
   ): Promise<UserInformation> {
-    console.log('data', data);
     return await this.userService.updateUserSocialNetwork(data, account?.id);
+  }
+
+  @Post('/handle-follow')
+  @UseGuards(JwtAuthenticationGuard)
+  async handleFollow(
+    @Body() data: {userIsFolled: number},
+    @CurrentAccount() account: any,
+  ): Promise<UserInformation> {    
+    return await this.userService.handleFolow(data?.userIsFolled, account?.id);
+  }
+
+  @Post('/handle-unfollow')
+  @UseGuards(JwtAuthenticationGuard)
+  async handleUnFollow(
+    @Body() data: {userIsFolled: number},
+    @CurrentAccount() account: any,
+  ): Promise<UserInformation> {    
+    return await this.userService.handleUnFolow(data?.userIsFolled, account?.id);
+  }
+
+  @Get('/get-following')
+  @UseGuards(JwtAuthenticationGuard)
+  getFollowing(
+    @Body() data: PaginationOptions,
+    @CurrentAccount() account: any,
+  ): Promise<PayloadResponse> {
+    return this.userService.getFollowing(account?.id, data);
+  }
+
+  @Get('/get-follower')
+  @UseGuards(JwtAuthenticationGuard)
+  getFollower(
+    @Body() data: PaginationOptions,
+    @CurrentAccount() account: any,
+  ): Promise<PayloadResponse> {
+    return this.userService.getFollower(account?.id, data);
   }
 
   @Get('/all-user')

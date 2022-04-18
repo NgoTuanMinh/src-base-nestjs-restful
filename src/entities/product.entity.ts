@@ -1,5 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
+import { TagProduct } from './tag.entity';
 import { User } from './user.entity';
 
 @Entity('product')
@@ -11,12 +12,24 @@ export class Product extends CommonEntity {
   name: string;
 
   @Column({
-    type: 'bigint',
-    name: 'price',
+    type: 'varchar',
+    name: 'imageUrl',
   })
-  price: number;
+  imageUrl: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn()
-  user: User;
+  @Column({
+    type: 'varchar',
+    name: 'description',
+    nullable: true
+  })
+  description: string;
+
+  @Column({
+    type: 'bigint',
+    name: 'owner',
+  })
+  owner: number;
+
+  @OneToMany(() => TagProduct, (tag) => tag.product)
+  tags: TagProduct[];
 }
