@@ -1,4 +1,5 @@
 import { Routes } from 'nest-router';
+import { AuctionModule } from 'src/modules/auction/auction.module';
 import { AuthenticationModule } from 'src/modules/authentication/authentication.module';
 import { PaymentModule } from 'src/modules/payment/payment.module';
 import { ProductModule } from 'src/modules/product/product.module';
@@ -23,6 +24,10 @@ export const ROUTERS: Routes = [
       {
         path: '/payment',
         module: PaymentModule,
+      },
+      {
+        path: '/auction',
+        module: AuctionModule,
       },
     ],
   },

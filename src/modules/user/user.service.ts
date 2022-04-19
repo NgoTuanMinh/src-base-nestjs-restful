@@ -8,7 +8,7 @@ import { ConflictExceptionCustom } from 'src/exceptions/conflict.exception ';
 import { paginateResponse, PaginationOptions, PayloadResponse } from 'src/utils/paginationUtils';
 import { Connection, EntityManager } from 'typeorm';
 import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
+import { QueryUserInput, UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
 import { UserRepository } from './user.repository';
 
 @Injectable()
@@ -327,6 +327,32 @@ export class UserService {
           skip
         })
         response = paginateResponse(data, {page, limit: take})
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * find one unions
+   * @param id
+   * @returns
+   */
+   async getUser(
+    userId: number,
+    query: QueryUserInput,
+  ): Promise<User> {
+    try {
+      let response: User;
+      await this.connection.transaction(async (manager: EntityManager) => {
+        const {relations} = query;
+
+        response = await manager.findOne(User, {
+          where: {id: userId},
+          relations: relations || [],
+        });
+        return response;
       });
       return response;
     } catch (error) {

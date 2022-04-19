@@ -11,3 +11,7 @@ export class UpdateUserSocialNetwork {
   displayNameSocial?: string;
   linkSocialNetwork?: string;
 }
+
+export class QueryUserInput {
+  relations?: string[];
+}

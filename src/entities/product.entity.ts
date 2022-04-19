@@ -1,7 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { CommonEntity } from './common.entity';
-import { TagProduct } from './tag.entity';
-import { User } from './user.entity';
+import { Tag } from './tag.entity';
 
 @Entity('product')
 export class Product extends CommonEntity {
@@ -30,6 +29,7 @@ export class Product extends CommonEntity {
   })
   owner: number;
 
-  @OneToMany(() => TagProduct, (tag) => tag.product)
-  tags: TagProduct[];
+  @ManyToMany(() => Tag)
+  @JoinTable()
+  tags: Tag[];
 }

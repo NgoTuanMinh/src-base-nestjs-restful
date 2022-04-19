@@ -6,7 +6,7 @@ import { UserService } from './user.service';
 import { UserInformation } from 'src/entities/user-information.entity';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
-import { UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
+import { QueryUserInput, UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
 import { PaginationOptions, PayloadResponse } from 'src/utils/paginationUtils';
 
 @Controller()
@@ -79,5 +79,14 @@ export class UserController {
     return this.userRepository.find({
       relations: ['userInformation'],
     });
+  }
+
+  @Get('/user-info')
+  @UseGuards(JwtAuthenticationGuard)
+  getUser(
+    @Body() query: QueryUserInput,
+    @CurrentAccount() account: any,
+  ): Promise<User> {
+    return this.userService.getUser(Number(account?.id), query);
   }
 }

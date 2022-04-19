@@ -1,16 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { CommonEntity } from './common.entity';
-import { Product } from './product.entity';
 
-@Entity('tag_product')
-export class TagProduct extends CommonEntity {
+@Entity('tag')
+export class Tag extends CommonEntity {
   @Column({
     type: 'varchar',
-    name: 'tag',
+    name: 'type',
   })
-  tag: string;
-  
-  @ManyToOne(() => Product)
-  @JoinColumn()
-  product: Product;
+  type: string;
 }

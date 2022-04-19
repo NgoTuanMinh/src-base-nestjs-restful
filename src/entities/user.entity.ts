@@ -1,6 +1,6 @@
 import { genSaltSync, hashSync } from 'bcryptjs';
 import { SALT_ROUND } from 'src/common';
-import { BeforeInsert, Column, Entity, Generated, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { BeforeInsert, Column, Entity, Generated, JoinColumn, JoinTable, ManyToMany, OneToOne } from 'typeorm';
 import { CommonEntity } from './common.entity';
 import { Product } from './product.entity';
 import { UserInformation } from './user-information.entity';
@@ -39,6 +39,10 @@ export class User extends CommonEntity {
 
   // @OneToMany(() => Product, (product) => product.user)
   // products: Product[];
+
+  @ManyToMany(() => Product, {cascade: true})
+  @JoinTable()
+  favouriteProduct: Product[];
 
   @OneToOne(() => UserInformation)
   @JoinColumn()

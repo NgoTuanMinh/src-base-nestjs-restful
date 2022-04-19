@@ -1,6 +1,5 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { CommonEntity } from './common.entity';
-import { User } from './user.entity';
 
 @Entity('user_information')
 export class UserInformation extends CommonEntity {
