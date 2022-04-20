@@ -1,4 +1,4 @@
-import { BullModule } from '@nestjs/bull';
+// import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RouterModule } from 'nest-router';
@@ -9,17 +9,19 @@ import { ROUTERS } from './config/router';
 import { DatabaseModule } from './database/database.module';
 import { MODULES } from './modules';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     // read environment variable
     ConfigModule.forRoot(),
-    BullModule.forRoot({
-      redis: {
-        host: config.redisHost,
-        port: config.redisPort,
-      },
-    }),
+    // BullModule.forRoot({
+    //   redis: {
+    //     host: config.redisHost,
+    //     port: config.redisPort,
+    //   },
+    // }),
+    ScheduleModule.forRoot(),
     RouterModule.forRoutes(ROUTERS),
     DatabaseModule,
     AuthenticationModule,

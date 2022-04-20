@@ -13,6 +13,13 @@ export class AuctionSession extends CommonEntity {
   })
   isSold: boolean;
 
+  @Column({
+    type: 'boolean',
+    name: 'isFinished',
+    default: false,
+  })
+  isFinished: boolean;
+
   @ManyToOne(() => User)
   @JoinColumn()
   seller: User;

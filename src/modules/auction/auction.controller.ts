@@ -31,4 +31,12 @@ export class AuctionController {
   ): Promise<Bid> {
     return this.auctionService.placeBid(data, Number(account?.id));
   }
+
+  @Post('/close-auction')
+  // @UseGuards(JwtAuthenticationGuard)
+  closeAuction(
+    @Body() data: any,
+  ): Promise<any> {
+    return this.auctionService.closeAuctionSession(data);
+  }
 }

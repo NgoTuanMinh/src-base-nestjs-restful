@@ -8,3 +8,8 @@ export class PlaceBidInput {
   auctionSessionId: number;
   bidPrice: number;
 }
+
+export class CloseAuctionSessionInput {
+  auctionSessionId: number;
+  timeEnd: Date;
+}
