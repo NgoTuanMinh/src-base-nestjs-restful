@@ -204,4 +204,23 @@ export class AuctionService {
       throw error;
     }
   }
+
+  async viewAuctionSession(auctionSessionId: number, currentUser: number) {
+    try {
+      await this.connection.transaction(async (manager: EntityManager) => {
+        const auctionSession = await manager.findOne(AuctionSession, 
+          auctionSessionId,
+          {relations: ['sessionInformation', 'seller']
+        });
+        
+        if (!auctionSession || Number(auctionSession?.seller?.id) === Number(currentUser)) {
+          return;
+        }
+
+        await manager.update(AuctionSessionInformation, auctionSession?.sessionInformation?.id, { rating: () => "rating + 1" });
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
 }

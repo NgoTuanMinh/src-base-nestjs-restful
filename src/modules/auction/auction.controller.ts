@@ -8,7 +8,7 @@ import { AuctionSession } from 'src/entities/auction-session.entity';
 import { Bid } from 'src/entities/bid.entity';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import { AuctionService } from './auction.service';
-import { CreateAuctionInput, PlaceBidInput } from './dto/auction.input';
+import { CreateAuctionInput, PlaceBidInput, ViewAuctionInput } from './dto/auction.input';
 
 @Controller()
 export class AuctionController {
@@ -38,5 +38,14 @@ export class AuctionController {
     @Body() data: any,
   ): Promise<any> {
     return this.auctionService.closeAuctionSession(data);
+  }
+
+  @Post('/view-auction')
+  @UseGuards(JwtAuthenticationGuard)
+  viewAuction(
+    @CurrentAccount() account: any,
+    @Body() data: ViewAuctionInput,
+  ): Promise<any> {
+    return this.auctionService.viewAuctionSession(data?.auctionSessionId, account?.id);
   }
 }

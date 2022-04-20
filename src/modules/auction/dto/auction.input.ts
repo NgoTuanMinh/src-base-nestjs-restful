@@ -13,3 +13,7 @@ export class CloseAuctionSessionInput {
   auctionSessionId: number;
   timeEnd: Date;
 }
+
+export class ViewAuctionInput {
+  auctionSessionId: number;
+}
