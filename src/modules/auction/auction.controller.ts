@@ -1,14 +1,16 @@
 import {
   Body,
-  Controller, Post,
+  Controller, Get, Param, Post,
+  Query,
   UseGuards
 } from '@nestjs/common';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
 import { AuctionSession } from 'src/entities/auction-session.entity';
 import { Bid } from 'src/entities/bid.entity';
+import { PayloadResponse } from 'src/utils/paginationUtils';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import { AuctionService } from './auction.service';
-import { CreateAuctionInput, PlaceBidInput, ViewAuctionInput } from './dto/auction.input';
+import { CreateAuctionInput, GetListAuctionsInput, PlaceBidInput, ViewAuctionInput } from './dto/auction.input';
 
 @Controller()
 export class AuctionController {
@@ -47,5 +49,13 @@ export class AuctionController {
     @Body() data: ViewAuctionInput,
   ): Promise<any> {
     return this.auctionService.viewAuctionSession(data?.auctionSessionId, account?.id);
+  }
+
+  @Get('/list-auction')
+  @UseGuards(JwtAuthenticationGuard)
+  listAuction(
+    @Query() data: GetListAuctionsInput,
+  ): Promise<PayloadResponse> {
+    return this.auctionService.getListAuction(data);
   }
 }

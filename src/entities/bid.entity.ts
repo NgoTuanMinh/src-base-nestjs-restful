@@ -6,7 +6,7 @@ import { User } from './user.entity';
 @Entity('bid')
 export class Bid extends CommonEntity {
   @Column({
-    type: 'bigint',
+    type: 'float',
     name: 'bidPrice',
     default: 0,
   })

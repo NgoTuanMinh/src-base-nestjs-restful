@@ -8,8 +8,9 @@ import { Bid } from 'src/entities/bid.entity';
 import { Product } from 'src/entities/product.entity';
 import { User } from 'src/entities/user.entity';
 import { BadRequestExceptionCustom } from 'src/exceptions/bad-request.exception ';
+import { paginateResponse } from 'src/utils/paginationUtils';
 import { Connection, EntityManager, getRepository } from 'typeorm';
-import { CloseAuctionSessionInput, CreateAuctionInput, PlaceBidInput } from './dto/auction.input';
+import { CloseAuctionSessionInput, CreateAuctionInput, GetListAuctionsInput, PlaceBidInput } from './dto/auction.input';
 
 @Injectable()
 export class AuctionService {
@@ -219,6 +220,34 @@ export class AuctionService {
 
         await manager.update(AuctionSessionInformation, auctionSession?.sessionInformation?.id, { rating: () => "rating + 1" });
       });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getListAuction(input: GetListAuctionsInput) {
+    try {
+      let response;
+      await this.connection.transaction(async (manager: EntityManager) => {
+        const { relations, limit = 10, page = 1 } = input;
+
+        const take = limit;
+        const skip = (page - 1) *limit;
+        
+        const data = await getRepository(AuctionSession)
+          .createQueryBuilder('auctionSession')
+          .leftJoinAndSelect('auctionSession.sessionInformation', 'sessionInformation')
+          .leftJoinAndSelect('auctionSession.seller', 'seller')
+          .leftJoinAndSelect('seller.userInformation', 'userInformation')
+          .leftJoinAndSelect('auctionSession.product', 'product')
+          .orderBy('sessionInformation.rating', 'DESC')
+          .addOrderBy('auctionSession.createdAt', 'DESC')
+          .take(take)
+          .skip(skip)
+          .getManyAndCount()
+        response = paginateResponse(data, {page, limit: take});
+      });
+      return response;
     } catch (error) {
       throw error;
     }

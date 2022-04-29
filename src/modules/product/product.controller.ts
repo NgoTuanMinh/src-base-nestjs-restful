@@ -1,6 +1,7 @@
 import {
   Body,
   Controller, Get, Post,
+  Query,
   UseGuards
 } from '@nestjs/common';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
@@ -36,7 +37,7 @@ export class ProductController {
   @UseGuards(JwtAuthenticationGuard)
   getListProductOwner(
     @CurrentAccount() account: any,
-    @Body() data: GetListProductOwnerInput,
+    @Query() data: GetListProductOwnerInput,
   ): Promise<PayloadResponse> {
     return this.productService.getListProductOwner(data, Number(account?.id));
   }

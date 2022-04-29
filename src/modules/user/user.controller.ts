@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UserRepository } from './user.repository';
@@ -84,7 +84,7 @@ export class UserController {
   @Get('/user-info')
   @UseGuards(JwtAuthenticationGuard)
   getUser(
-    @Body() query: QueryUserInput,
+    @Query() query: QueryUserInput,
     @CurrentAccount() account: any,
   ): Promise<User> {
     return this.userService.getUser(Number(account?.id), query);

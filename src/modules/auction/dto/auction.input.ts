@@ -17,3 +17,9 @@ export class CloseAuctionSessionInput {
 export class ViewAuctionInput {
   auctionSessionId: number;
 }
+
+export class GetListAuctionsInput {
+  relations?: string[];
+  limit?: number;
+  page?: number;
+}

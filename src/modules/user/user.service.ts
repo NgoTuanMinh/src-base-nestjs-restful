@@ -73,6 +73,7 @@ export class UserService {
       await this.connection.transaction(async (manager: EntityManager) => {
         const currentUser = await this.repository.findOne({
           where: { id: userId },
+          relations: ['userInformation'],
         });
 
         if (!currentUser) {

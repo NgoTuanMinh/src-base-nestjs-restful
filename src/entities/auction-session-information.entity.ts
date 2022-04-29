@@ -19,7 +19,7 @@ export class AuctionSessionInformation extends CommonEntity {
   timeEnd: Date;
 
   @Column({
-    type: 'bigint',
+    type: 'float',
     name: 'reservePrice',
   })
   reservePrice: number;
