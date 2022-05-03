@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UserRepository } from './user.repository';
@@ -6,7 +6,11 @@ import { UserService } from './user.service';
 import { UserInformation } from 'src/entities/user-information.entity';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
-import { QueryUserInput, UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
+import {
+  QueryUserInput,
+  UpdateUserInfoInput,
+  UpdateUserSocialNetwork,
+} from './dto/user.input';
 import { PaginationOptions, PayloadResponse } from 'src/utils/paginationUtils';
 
 @Controller()
@@ -41,19 +45,22 @@ export class UserController {
   @Post('/handle-follow')
   @UseGuards(JwtAuthenticationGuard)
   async handleFollow(
-    @Body() data: {userIsFolled: number},
+    @Body() data: { userIsFolled: number },
     @CurrentAccount() account: any,
-  ): Promise<UserInformation> {    
+  ): Promise<UserInformation> {
     return await this.userService.handleFolow(data?.userIsFolled, account?.id);
   }
 
   @Post('/handle-unfollow')
   @UseGuards(JwtAuthenticationGuard)
   async handleUnFollow(
-    @Body() data: {userIsFolled: number},
+    @Body() data: { userIsFolled: number },
     @CurrentAccount() account: any,
-  ): Promise<UserInformation> {    
-    return await this.userService.handleUnFolow(data?.userIsFolled, account?.id);
+  ): Promise<UserInformation> {
+    return await this.userService.handleUnFolow(
+      data?.userIsFolled,
+      account?.id,
+    );
   }
 
   @Get('/get-following')
@@ -84,7 +91,7 @@ export class UserController {
   @Get('/user-info')
   @UseGuards(JwtAuthenticationGuard)
   getUser(
-    @Body() query: QueryUserInput,
+    @Query() query: QueryUserInput,
     @CurrentAccount() account: any,
   ): Promise<User> {
     return this.userService.getUser(Number(account?.id), query);

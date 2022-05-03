@@ -8,14 +8,20 @@ import { Bid } from 'src/entities/bid.entity';
 import { Product } from 'src/entities/product.entity';
 import { User } from 'src/entities/user.entity';
 import { BadRequestExceptionCustom } from 'src/exceptions/bad-request.exception ';
+import { paginateResponse } from 'src/utils/paginationUtils';
 import { Connection, EntityManager, getRepository } from 'typeorm';
-import { CloseAuctionSessionInput, CreateAuctionInput, PlaceBidInput } from './dto/auction.input';
+import {
+  CloseAuctionSessionInput,
+  CreateAuctionInput,
+  GetListAuctionsInput,
+  PlaceBidInput,
+} from './dto/auction.input';
 
 @Injectable()
 export class AuctionService {
   constructor(
     private connection: Connection,
-    private readonly schedulerRegistry: SchedulerRegistry
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
   /**
@@ -23,7 +29,7 @@ export class AuctionService {
    * @param id
    * @returns
    */
-   async createAuctionSession(
+  async createAuctionSession(
     data: CreateAuctionInput,
     userId: number,
   ): Promise<AuctionSession> {
@@ -37,16 +43,23 @@ export class AuctionService {
           throw new BadRequestExceptionCustom('Permission denied. Try again.');
         }
 
-        const newSessionInformation = manager.create(AuctionSessionInformation, {
-          timeEnd,
-          reservePrice,
-        })
+        const newSessionInformation = manager.create(
+          AuctionSessionInformation,
+          {
+            timeEnd,
+            reservePrice,
+          },
+        );
 
-        const resultCreateSessionInfo = await manager.save(newSessionInformation);
-        
+        const resultCreateSessionInfo = await manager.save(
+          newSessionInformation,
+        );
+
         const product = await manager.findOne(Product, productId);
         if (!product || Number(product?.owner) !== Number(userId)) {
-          throw new BadRequestExceptionCustom('Your image not found. Try again.');
+          throw new BadRequestExceptionCustom(
+            'Your image not found. Try again.',
+          );
         }
 
         const newAuctionSession = manager.create(AuctionSession, {
@@ -56,7 +69,10 @@ export class AuctionService {
         });
 
         response = await manager.save(newAuctionSession);
-        await this.scheduleCloseAuctionSession({timeEnd: newAuctionSession?.sessionInformation?.timeEnd, auctionSessionId: response?.id});
+        await this.scheduleCloseAuctionSession({
+          timeEnd: newAuctionSession?.sessionInformation?.timeEnd,
+          auctionSessionId: response?.id,
+        });
       });
       return response;
     } catch (error) {
@@ -69,10 +85,7 @@ export class AuctionService {
    * @param id
    * @returns
    */
-   async placeBid(
-    data: PlaceBidInput,
-    userId: number,
-  ): Promise<Bid> {
+  async placeBid(data: PlaceBidInput, userId: number): Promise<Bid> {
     try {
       let response;
       await this.connection.transaction(async (manager: EntityManager) => {
@@ -80,14 +93,26 @@ export class AuctionService {
 
         const currentUser = await manager.findOne(User, userId);
         if (!currentUser) {
-          throw new BadRequestExceptionCustom('Failed to place a bid. Try again.');
+          throw new BadRequestExceptionCustom(
+            'Failed to place a bid. Try again.',
+          );
         }
 
-        const auctionSession = await manager.findOne(AuctionSession, auctionSessionId, {relations: ['sessionInformation']});
+        const auctionSession = await manager.findOne(
+          AuctionSession,
+          auctionSessionId,
+          { relations: ['sessionInformation'] },
+        );
         if (!auctionSession) {
-          throw new BadRequestExceptionCustom('Failed to place a bid. Try again.');
-        } else if (bidPrice <= auctionSession?.sessionInformation?.reservePrice) {
-          throw new BadRequestExceptionCustom('Your price must larger the reserve price. Try again.');
+          throw new BadRequestExceptionCustom(
+            'Failed to place a bid. Try again.',
+          );
+        } else if (
+          bidPrice <= auctionSession?.sessionInformation?.reservePrice
+        ) {
+          throw new BadRequestExceptionCustom(
+            'Your price must larger the reserve price. Try again.',
+          );
         } else if (auctionSession.isFinished) {
           throw new BadRequestExceptionCustom('Auction has closed.');
         }
@@ -96,23 +121,29 @@ export class AuctionService {
           bidPrice,
           bidBy: currentUser,
           auctionSession,
-        })
-        
+        });
+
         response = await manager.save(newBid);
-        
+
         const { sessionInformation } = auctionSession;
-        if (!sessionInformation.largestBid || ((Number(response?.bidPrice) > Number(sessionInformation?.largestBid?.bidPrice)))){
-          await manager.getRepository(AuctionSessionInformation).update(sessionInformation?.id, {largestBid: response});
+        if (
+          !sessionInformation.largestBid ||
+          Number(response?.bidPrice) >
+            Number(sessionInformation?.largestBid?.bidPrice)
+        ) {
+          await manager
+            .getRepository(AuctionSessionInformation)
+            .update(sessionInformation?.id, { largestBid: response });
         }
 
         const currentUserBalence = await manager.findOne(Balence, {
           where: {
-            userId
-          }
-        })
+            userId,
+          },
+        });
 
         if (!currentUserBalence || currentUserBalence.amount <= 0) {
-          throw new BadRequestExceptionCustom('Please connect your wallet.')
+          throw new BadRequestExceptionCustom('Please connect your wallet.');
         }
 
         const oldAmount = currentUserBalence?.amount;
@@ -137,7 +168,7 @@ export class AuctionService {
       this.closeAuctionSession(data);
     });
     console.log('scheduleCloseAuctionSession=============', job);
-    
+
     this.schedulerRegistry.addCronJob(`${date}_${auctionSessionId}`, job);
     job.start();
   }
@@ -147,16 +178,27 @@ export class AuctionService {
     const date = new Date(timeEnd);
     try {
       await this.connection.transaction(async (manager: EntityManager) => {
-        const auctionSession = await manager.findOne(AuctionSession, 
+        const auctionSession = await manager.findOne(
+          AuctionSession,
           auctionSessionId,
-          {relations: ['sessionInformation','product', 'sessionInformation.largestBid', 'sessionInformation.largestBid.bidBy',]
-        });
+          {
+            relations: [
+              'sessionInformation',
+              'product',
+              'sessionInformation.largestBid',
+              'sessionInformation.largestBid.bidBy',
+            ],
+          },
+        );
         if (!auctionSession) {
           return;
         }
-        auctionSession.isFinished = true;        
+        auctionSession.isFinished = true;
 
-        const product = await manager.findOne(Product, auctionSession?.product?.id);
+        const product = await manager.findOne(
+          Product,
+          auctionSession?.product?.id,
+        );
         if (!product) {
           return;
         }
@@ -174,8 +216,8 @@ export class AuctionService {
           .createQueryBuilder('bid')
           .leftJoinAndSelect('bid.auctionSession', 'auctionSession')
           .leftJoinAndSelect('bid.bidBy', 'bidBy')
-          .where('auctionSession.id = :auctionSessionId', {auctionSessionId})
-          .andWhere('bid.id != :largestBidId', {largestBidId: largestBid?.id})
+          .where('auctionSession.id = :auctionSessionId', { auctionSessionId })
+          .andWhere('bid.id != :largestBidId', { largestBidId: largestBid?.id })
           .getMany();
 
         const listObjUserRefund = {};
@@ -183,20 +225,25 @@ export class AuctionService {
           if (!listObjUserRefund[bidItem?.bidBy?.id]) {
             listObjUserRefund[bidItem?.bidBy?.id] = Number(bidItem?.bidPrice);
           } else {
-            listObjUserRefund[bidItem?.bidBy?.id] = Number(bidItem?.bidPrice) + listObjUserRefund[bidItem?.bidBy?.id];
+            listObjUserRefund[bidItem?.bidBy?.id] =
+              Number(bidItem?.bidPrice) + listObjUserRefund[bidItem?.bidBy?.id];
           }
         });
 
-        const listPromise = Object.keys(listObjUserRefund).map(async (userIdItem: string) => {
-          const userBalence = await manager.findOne(Balence, {
-            where: {
-              userId: Number(userIdItem)
-            }
-          });
-          if (!userBalence) return;
-          userBalence.amount = Number(userBalence.amount) + Number(listObjUserRefund[userIdItem]);          
-          return manager.save(userBalence);
-        })
+        const listPromise = Object.keys(listObjUserRefund).map(
+          async (userIdItem: string) => {
+            const userBalence = await manager.findOne(Balence, {
+              where: {
+                userId: Number(userIdItem),
+              },
+            });
+            if (!userBalence) return;
+            userBalence.amount =
+              Number(userBalence.amount) +
+              Number(listObjUserRefund[userIdItem]);
+            return manager.save(userBalence);
+          },
+        );
 
         await Promise.all(listPromise);
       });
@@ -208,17 +255,56 @@ export class AuctionService {
   async viewAuctionSession(auctionSessionId: number, currentUser: number) {
     try {
       await this.connection.transaction(async (manager: EntityManager) => {
-        const auctionSession = await manager.findOne(AuctionSession, 
+        const auctionSession = await manager.findOne(
+          AuctionSession,
           auctionSessionId,
-          {relations: ['sessionInformation', 'seller']
-        });
-        
-        if (!auctionSession || Number(auctionSession?.seller?.id) === Number(currentUser)) {
+          { relations: ['sessionInformation', 'seller'] },
+        );
+
+        if (
+          !auctionSession ||
+          Number(auctionSession?.seller?.id) === Number(currentUser)
+        ) {
           return;
         }
 
-        await manager.update(AuctionSessionInformation, auctionSession?.sessionInformation?.id, { rating: () => "rating + 1" });
+        await manager.update(
+          AuctionSessionInformation,
+          auctionSession?.sessionInformation?.id,
+          { rating: () => 'rating + 1' },
+        );
       });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getListAuction(input: GetListAuctionsInput) {
+    try {
+      let response;
+      await this.connection.transaction(async () => {
+        const { limit = 10, page = 1 } = input;
+
+        const take = limit;
+        const skip = (page - 1) * limit;
+
+        const data = await getRepository(AuctionSession)
+          .createQueryBuilder('auctionSession')
+          .leftJoinAndSelect(
+            'auctionSession.sessionInformation',
+            'sessionInformation',
+          )
+          .leftJoinAndSelect('auctionSession.seller', 'seller')
+          .leftJoinAndSelect('seller.userInformation', 'userInformation')
+          .leftJoinAndSelect('auctionSession.product', 'product')
+          .orderBy('sessionInformation.rating', 'DESC')
+          .addOrderBy('auctionSession.createdAt', 'DESC')
+          .take(take)
+          .skip(skip)
+          .getManyAndCount();
+        response = paginateResponse(data, { page, limit: take });
+      });
+      return response;
     } catch (error) {
       throw error;
     }

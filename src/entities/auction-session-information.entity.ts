@@ -10,7 +10,7 @@ export class AuctionSessionInformation extends CommonEntity {
     default: 0,
   })
   rating: number;
-  
+
   @Column({
     type: 'timestamp with time zone',
     name: 'timeEnd',
@@ -19,7 +19,7 @@ export class AuctionSessionInformation extends CommonEntity {
   timeEnd: Date;
 
   @Column({
-    type: 'bigint',
+    type: 'float',
     name: 'reservePrice',
   })
   reservePrice: number;

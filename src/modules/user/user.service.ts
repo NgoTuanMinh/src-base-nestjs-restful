@@ -5,10 +5,18 @@ import { UserSocialNetwork } from 'src/entities/user-social-network.entity';
 import { User } from 'src/entities/user.entity';
 import { BadRequestExceptionCustom } from 'src/exceptions/bad-request.exception ';
 import { ConflictExceptionCustom } from 'src/exceptions/conflict.exception ';
-import { paginateResponse, PaginationOptions, PayloadResponse } from 'src/utils/paginationUtils';
+import {
+  paginateResponse,
+  PaginationOptions,
+  PayloadResponse,
+} from 'src/utils/paginationUtils';
 import { Connection, EntityManager } from 'typeorm';
 import { CreateUserInput } from './dto/create-user.input';
-import { QueryUserInput, UpdateUserInfoInput, UpdateUserSocialNetwork } from './dto/user.input';
+import {
+  QueryUserInput,
+  UpdateUserInfoInput,
+  UpdateUserSocialNetwork,
+} from './dto/user.input';
 import { UserRepository } from './user.repository';
 
 @Injectable()
@@ -73,6 +81,7 @@ export class UserService {
       await this.connection.transaction(async (manager: EntityManager) => {
         const currentUser = await this.repository.findOne({
           where: { id: userId },
+          relations: ['userInformation'],
         });
 
         if (!currentUser) {
@@ -179,21 +188,17 @@ export class UserService {
    * @param id
    * @returns
    */
-   async handleFolow(
-    userIsFollowed: number,
-    userId: number,
-  ): Promise<any> {
+  async handleFolow(userIsFollowed: number, userId: number): Promise<any> {
     try {
       if (!userIsFollowed) return;
       let response: Follow;
       await this.connection.transaction(async (manager: EntityManager) => {
-
         const followQuery = await manager.findOne(Follow, {
           where: {
             userFollow: userId,
-            userIsFollowed
-          }
-        })
+            userIsFollowed,
+          },
+        });
 
         if (followQuery) {
           throw new BadRequestExceptionCustom('This user is followed');
@@ -202,11 +207,13 @@ export class UserService {
         const checkUserIsFolled = await manager.findOne(User, {
           where: {
             id: userIsFollowed,
-          }
-        })
+          },
+        });
 
         if (!checkUserIsFolled) {
-          throw new BadRequestExceptionCustom('Failed to follow. Try again later.')
+          throw new BadRequestExceptionCustom(
+            'Failed to follow. Try again later.',
+          );
         }
 
         const newFollow = manager.create(Follow, {
@@ -216,7 +223,9 @@ export class UserService {
 
         response = await manager.save(newFollow);
         if (!response) {
-          throw new BadRequestExceptionCustom('Failed to follow. Try again later.')
+          throw new BadRequestExceptionCustom(
+            'Failed to follow. Try again later.',
+          );
         }
       });
       return response;
@@ -230,34 +239,34 @@ export class UserService {
    * @param id
    * @returns
    */
-   async handleUnFolow(
-    userIsFollowed: number,
-    userId: number,
-  ): Promise<any> {
+  async handleUnFolow(userIsFollowed: number, userId: number): Promise<any> {
     try {
       if (!userIsFollowed) return;
       let success = false;
       await this.connection.transaction(async (manager: EntityManager) => {
-
         const followQuery = await manager.findOne(Follow, {
           where: {
             userFollow: userId,
-            userIsFollowed
-          }
-        })
+            userIsFollowed,
+          },
+        });
 
         if (!followQuery) {
-          throw new BadRequestExceptionCustom('Failed to unfollow. Try again later.');
+          throw new BadRequestExceptionCustom(
+            'Failed to unfollow. Try again later.',
+          );
         }
 
         const checkUserIsFolled = await manager.findOne(User, {
           where: {
             id: userIsFollowed,
-          }
-        })
+          },
+        });
 
         if (!checkUserIsFolled) {
-          throw new BadRequestExceptionCustom('Failed to follow. Try again later.')
+          throw new BadRequestExceptionCustom(
+            'Failed to follow. Try again later.',
+          );
         }
 
         await manager.remove(followQuery);
@@ -275,9 +284,9 @@ export class UserService {
    * @param id
    * @returns
    */
-   async getFollowing(
+  async getFollowing(
     userId: number,
-    options: PaginationOptions
+    options: PaginationOptions,
   ): Promise<PayloadResponse> {
     try {
       let response: PayloadResponse;
@@ -286,15 +295,15 @@ export class UserService {
         const page = options?.page || 1;
         const skip = (page - 1) * options?.limit;
 
-       const data = await manager.findAndCount(Follow, {
+        const data = await manager.findAndCount(Follow, {
           where: {
             userFollow: userId,
           },
-          order: {createdAt: 'DESC'},
+          order: { createdAt: 'DESC' },
           take,
-          skip
-        })
-        response = paginateResponse(data, {page, limit: take})
+          skip,
+        });
+        response = paginateResponse(data, { page, limit: take });
       });
       return response;
     } catch (error) {
@@ -307,9 +316,9 @@ export class UserService {
    * @param id
    * @returns
    */
-   async getFollower(
+  async getFollower(
     userId: number,
-    options: PaginationOptions
+    options: PaginationOptions,
   ): Promise<PayloadResponse> {
     try {
       let response: PayloadResponse;
@@ -318,15 +327,15 @@ export class UserService {
         const page = options?.page || 1;
         const skip = (page - 1) * options?.limit;
 
-       const data = await manager.findAndCount(Follow, {
+        const data = await manager.findAndCount(Follow, {
           where: {
             userIsFollowed: userId,
           },
-          order: {createdAt: 'DESC'},
+          order: { createdAt: 'DESC' },
           take,
-          skip
-        })
-        response = paginateResponse(data, {page, limit: take})
+          skip,
+        });
+        response = paginateResponse(data, { page, limit: take });
       });
       return response;
     } catch (error) {
@@ -339,18 +348,15 @@ export class UserService {
    * @param id
    * @returns
    */
-   async getUser(
-    userId: number,
-    query: QueryUserInput,
-  ): Promise<User> {
+  async getUser(userId: number, query: QueryUserInput): Promise<User> {
     try {
       let response: User;
       await this.connection.transaction(async (manager: EntityManager) => {
-        const {relations} = query;
+        const { relations } = query;
 
         response = await manager.findOne(User, {
-          where: {id: userId},
-          relations: relations || [],
+          where: { id: userId },
+          relations: relations || ['userInformation'],
         });
         return response;
       });

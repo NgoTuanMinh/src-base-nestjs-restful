@@ -1,14 +1,16 @@
-import {
-  Body,
-  Controller, Post,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { CurrentAccount } from 'src/decorators/current-account.decorator';
 import { AuctionSession } from 'src/entities/auction-session.entity';
 import { Bid } from 'src/entities/bid.entity';
+import { PayloadResponse } from 'src/utils/paginationUtils';
 import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import { AuctionService } from './auction.service';
-import { CreateAuctionInput, PlaceBidInput, ViewAuctionInput } from './dto/auction.input';
+import {
+  CreateAuctionInput,
+  GetListAuctionsInput,
+  PlaceBidInput,
+  ViewAuctionInput,
+} from './dto/auction.input';
 
 @Controller()
 export class AuctionController {
@@ -34,9 +36,7 @@ export class AuctionController {
 
   @Post('/close-auction')
   // @UseGuards(JwtAuthenticationGuard)
-  closeAuction(
-    @Body() data: any,
-  ): Promise<any> {
+  closeAuction(@Body() data: any): Promise<any> {
     return this.auctionService.closeAuctionSession(data);
   }
 
@@ -46,6 +46,15 @@ export class AuctionController {
     @CurrentAccount() account: any,
     @Body() data: ViewAuctionInput,
   ): Promise<any> {
-    return this.auctionService.viewAuctionSession(data?.auctionSessionId, account?.id);
+    return this.auctionService.viewAuctionSession(
+      data?.auctionSessionId,
+      account?.id,
+    );
+  }
+
+  @Get('/list-auction')
+  @UseGuards(JwtAuthenticationGuard)
+  listAuction(@Query() data: GetListAuctionsInput): Promise<PayloadResponse> {
+    return this.auctionService.getListAuction(data);
   }
 }

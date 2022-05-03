@@ -13,5 +13,5 @@ export class UpdateUserSocialNetwork {
 }
 
 export class QueryUserInput {
-  relations?: string[];
+  relations?: string[] | any;
 }

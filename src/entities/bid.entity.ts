@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { AuctionSession } from './auction-session.entity';
 import { CommonEntity } from './common.entity';
 import { User } from './user.entity';
@@ -6,12 +6,12 @@ import { User } from './user.entity';
 @Entity('bid')
 export class Bid extends CommonEntity {
   @Column({
-    type: 'bigint',
+    type: 'float',
     name: 'bidPrice',
     default: 0,
   })
   bidPrice: number;
-  
+
   @ManyToOne(() => User)
   @JoinColumn()
   bidBy: User;
