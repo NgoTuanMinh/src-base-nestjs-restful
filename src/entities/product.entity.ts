@@ -13,19 +13,21 @@ export class Product extends CommonEntity {
   @Column({
     type: 'varchar',
     name: 'imageUrl',
+    nullable: true,
   })
   imageUrl: string;
 
   @Column({
     type: 'varchar',
     name: 'description',
-    nullable: true
+    nullable: true,
   })
   description: string;
 
   @Column({
     type: 'bigint',
     name: 'owner',
+    nullable: true,
   })
   owner: number;
 
