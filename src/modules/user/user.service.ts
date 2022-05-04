@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Balence } from 'src/entities/balence.entity';
 import { Follow } from 'src/entities/follow.entity';
 import { UserInformation } from 'src/entities/user-information.entity';
 import { UserSocialNetwork } from 'src/entities/user-social-network.entity';
@@ -358,6 +359,12 @@ export class UserService {
           where: { id: userId },
           relations: relations || ['userInformation'],
         });
+        const balence = await manager.findOne(Balence, {
+          where: { userId },
+        })
+        if (balence) {
+          response['balence'] = balence;
+        }
         return response;
       });
       return response;

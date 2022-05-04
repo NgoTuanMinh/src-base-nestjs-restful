@@ -297,8 +297,10 @@ export class AuctionService {
           .leftJoinAndSelect('auctionSession.seller', 'seller')
           .leftJoinAndSelect('seller.userInformation', 'userInformation')
           .leftJoinAndSelect('auctionSession.product', 'product')
+          .leftJoinAndSelect('product.tags', 'tags')
           .orderBy('sessionInformation.rating', 'DESC')
           .addOrderBy('auctionSession.createdAt', 'DESC')
+          .where('sessionInformation.timeEnd > :now', {now: new Date().toISOString()})
           .take(take)
           .skip(skip)
           .getManyAndCount();
