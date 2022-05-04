@@ -7,7 +7,7 @@ export class UserInformation extends CommonEntity {
     type: 'int',
     name: 'rating',
     nullable: true,
-    default: 0
+    default: 0,
   })
   rating: number;
 
@@ -17,7 +17,7 @@ export class UserInformation extends CommonEntity {
     nullable: true,
   })
   profileImage: string;
-  
+
   @Column({
     type: 'varchar',
     name: 'bio',

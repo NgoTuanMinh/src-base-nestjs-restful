@@ -10,7 +10,7 @@ export class Balence extends CommonEntity {
   userId: number;
 
   @Column({
-    type: 'bigint',
+    type: 'float',
     name: 'amount',
   })
   amount: number;

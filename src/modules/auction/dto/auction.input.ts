@@ -23,3 +23,9 @@ export class GetListAuctionsInput {
   limit?: number;
   page?: number;
 }
+export class GetListBidsInput {
+  relations?: string[];
+  auctionSessionId?: number;
+  limit?: number;
+  page?: number;
+}

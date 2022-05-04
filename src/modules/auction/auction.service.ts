@@ -14,6 +14,7 @@ import {
   CloseAuctionSessionInput,
   CreateAuctionInput,
   GetListAuctionsInput,
+  GetListBidsInput,
   PlaceBidInput,
 } from './dto/auction.input';
 
@@ -300,7 +301,38 @@ export class AuctionService {
           .leftJoinAndSelect('product.tags', 'tags')
           .orderBy('sessionInformation.rating', 'DESC')
           .addOrderBy('auctionSession.createdAt', 'DESC')
-          .where('sessionInformation.timeEnd > :now', {now: new Date().toISOString()})
+          .where('sessionInformation.timeEnd > :now', {
+            now: new Date().toISOString(),
+          })
+          .take(take)
+          .skip(skip)
+          .getManyAndCount();
+        response = paginateResponse(data, { page, limit: take });
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getListBid(input: GetListBidsInput) {
+    try {
+      let response;
+      await this.connection.transaction(async () => {
+        const { limit = 10, page = 1, auctionSessionId } = input;
+
+        const take = limit;
+        const skip = (page - 1) * limit;
+
+        const data = await getRepository(Bid)
+          .createQueryBuilder('bid')
+          .leftJoinAndSelect('bid.bidBy', 'user')
+          .leftJoinAndSelect('user.userInformation', 'userInformation')
+          .orderBy('bid.bidPrice', 'DESC')
+          .addOrderBy('bid.createdAt', 'DESC')
+          .where('bid.auctionSessionId = :auctionSessionId', {
+            auctionSessionId,
+          })
           .take(take)
           .skip(skip)
           .getManyAndCount();

@@ -8,6 +8,7 @@ import { AuctionService } from './auction.service';
 import {
   CreateAuctionInput,
   GetListAuctionsInput,
+  GetListBidsInput,
   PlaceBidInput,
   ViewAuctionInput,
 } from './dto/auction.input';
@@ -56,5 +57,11 @@ export class AuctionController {
   @UseGuards(JwtAuthenticationGuard)
   listAuction(@Query() data: GetListAuctionsInput): Promise<PayloadResponse> {
     return this.auctionService.getListAuction(data);
+  }
+
+  @Get('/list-bid')
+  @UseGuards(JwtAuthenticationGuard)
+  listBid(@Query() data: GetListBidsInput): Promise<PayloadResponse> {
+    return this.auctionService.getListBid(data);
   }
 }

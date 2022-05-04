@@ -361,7 +361,7 @@ export class UserService {
         });
         const balence = await manager.findOne(Balence, {
           where: { userId },
-        })
+        });
         if (balence) {
           response['balence'] = balence;
         }
