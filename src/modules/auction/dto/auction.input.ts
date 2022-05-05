@@ -29,3 +29,7 @@ export class GetListBidsInput {
   limit?: number;
   page?: number;
 }
+
+export class GetAuctionDetailInput {
+  auctionId: number;
+}

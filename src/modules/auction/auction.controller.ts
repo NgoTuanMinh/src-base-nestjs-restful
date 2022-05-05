@@ -7,6 +7,7 @@ import JwtAuthenticationGuard from '../authentication/jwt-authentication.guard';
 import { AuctionService } from './auction.service';
 import {
   CreateAuctionInput,
+  GetAuctionDetailInput,
   GetListAuctionsInput,
   GetListBidsInput,
   PlaceBidInput,
@@ -57,6 +58,12 @@ export class AuctionController {
   @UseGuards(JwtAuthenticationGuard)
   listAuction(@Query() data: GetListAuctionsInput): Promise<PayloadResponse> {
     return this.auctionService.getListAuction(data);
+  }
+
+  @Get('/auction')
+  @UseGuards(JwtAuthenticationGuard)
+  auctionDetail(@Query() data: GetAuctionDetailInput): Promise<AuctionSession> {
+    return this.auctionService.getAuctionDetail(data);
   }
 
   @Get('/list-bid')

@@ -13,6 +13,7 @@ import { Connection, EntityManager, getRepository } from 'typeorm';
 import {
   CloseAuctionSessionInput,
   CreateAuctionInput,
+  GetAuctionDetailInput,
   GetListAuctionsInput,
   GetListBidsInput,
   PlaceBidInput,
@@ -295,6 +296,7 @@ export class AuctionService {
             'auctionSession.sessionInformation',
             'sessionInformation',
           )
+          .leftJoinAndSelect('sessionInformation.largestBid', 'largestBid')
           .leftJoinAndSelect('auctionSession.seller', 'seller')
           .leftJoinAndSelect('seller.userInformation', 'userInformation')
           .leftJoinAndSelect('auctionSession.product', 'product')
@@ -308,6 +310,37 @@ export class AuctionService {
           .skip(skip)
           .getManyAndCount();
         response = paginateResponse(data, { page, limit: take });
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAuctionDetail(input: GetAuctionDetailInput) {
+    try {
+      let response;
+      await this.connection.transaction(async () => {
+        const { auctionId } = input;
+
+        const data = await getRepository(AuctionSession)
+          .createQueryBuilder('auctionSession')
+          .leftJoinAndSelect(
+            'auctionSession.sessionInformation',
+            'sessionInformation',
+          )
+          .leftJoinAndSelect('sessionInformation.largestBid', 'largestBid')
+          .leftJoinAndSelect('auctionSession.seller', 'seller')
+          .leftJoinAndSelect('seller.userInformation', 'userInformation')
+          .leftJoinAndSelect('auctionSession.product', 'product')
+          .leftJoinAndSelect('product.tags', 'tags')
+          .orderBy('sessionInformation.rating', 'DESC')
+          .addOrderBy('auctionSession.createdAt', 'DESC')
+          .where('auctionSession.id = :auctionId', {
+            auctionId
+          })
+          .getOne()
+        response = data;
       });
       return response;
     } catch (error) {
