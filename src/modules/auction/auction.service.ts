@@ -337,9 +337,9 @@ export class AuctionService {
           .orderBy('sessionInformation.rating', 'DESC')
           .addOrderBy('auctionSession.createdAt', 'DESC')
           .where('auctionSession.id = :auctionId', {
-            auctionId
+            auctionId,
           })
-          .getOne()
+          .getOne();
         response = data;
       });
       return response;
